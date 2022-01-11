@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Manager, Reference, Popper } from 'react-popper';
 import debounce from 'lodash.debounce';
 import memoize from 'lodash.memoize';
 import reduce from 'lodash.reduce';
@@ -941,29 +942,69 @@ class PhoneInput extends React.Component {
     const inputFlagClasses = `flag ${selectedCountry && selectedCountry.iso2}`;
 
     return (
-      <div
-        className={containerClasses}
-        style={this.props.style || this.props.containerStyle}
-        onKeyDown={this.handleKeydown}>
-        {specialLabel && <div className='special-label'>{specialLabel}</div>}
-        {errorMessage && <div className='invalid-number-message'>{errorMessage}</div>}
-        <input
-          className={inputClasses}
-          style={this.props.inputStyle}
-          onChange={this.handleInput}
-          onClick={this.handleInputClick}
-          onDoubleClick={this.handleDoubleClick}
-          onFocus={this.handleInputFocus}
-          onBlur={this.handleInputBlur}
-          onCopy={this.handleInputCopy}
-          value={formattedNumber}
-          ref={el => this.numberInputRef = el}
-          onKeyDown={this.handleInputKeyDown}
-          placeholder={this.props.placeholder}
-          disabled={this.props.disabled}
-          type='tel'
-          {...this.props.inputProps}
-        />
+      <Manager>
+
+        <Reference>
+          {({ ref }) => (
+            <div
+              ref={ref}
+              style={{ position: 'relative' }}
+            >
+
+              <div
+                className={containerClasses}
+                style={this.props.style || this.props.containerStyle}
+                onKeyDown={this.handleKeydown}
+              >
+                {specialLabel && <div className='special-label'>{specialLabel}</div>}
+                {errorMessage && <div className='invalid-number-message'>{errorMessage}</div>}
+                <input
+                  className={inputClasses}
+                  style={this.props.inputStyle}
+                  onChange={this.handleInput}
+                  onClick={this.handleInputClick}
+                  onDoubleClick={this.handleDoubleClick}
+                  onFocus={this.handleInputFocus}
+                  onBlur={this.handleInputBlur}
+                  onCopy={this.handleInputCopy}
+                  value={formattedNumber}
+                  ref={el => this.numberInputRef = el}
+                  onKeyDown={this.handleInputKeyDown}
+                  placeholder={this.props.placeholder}
+                  disabled={this.props.disabled}
+                  type='tel'
+                  {...this.props.inputProps}
+                />
+
+                <div
+                  className={flagViewClasses}
+                  style={this.props.buttonStyle}
+                  ref={el => this.dropdownContainerRef = el}
+                >
+                  {renderStringAsFlag ?
+                    <div className={selectedFlagClasses}>{renderStringAsFlag}</div>
+                    :
+                    <div
+                      onClick={disableDropdown ? undefined : this.handleFlagDropdownClick}
+                      className={selectedFlagClasses}
+                      title={selectedCountry ? `${selectedCountry.name}: + ${selectedCountry.dialCode}` : ''}
+                      tabIndex={disableDropdown ? '-1' : '0'}
+                      role='button'
+                      aria-haspopup="listbox"
+                      aria-expanded={showDropdown ? true : undefined}
+                    >
+                      <div className={inputFlagClasses}>
+                        {!disableDropdown && <div className={arrowClasses} />}
+                      </div>
+                    </div>}
+
+                  {!this.props.portalId && showDropdown && this.getCountryDropdownList()}
+                </div>
+              </div>
+
+            </div>
+          )}
+        </Reference>
 
         {this.props.portalId && (
           <Portal
@@ -971,38 +1012,33 @@ class PhoneInput extends React.Component {
             portalHost={this.props.portalHost}
           >
 
-            <div className={portalClasses}>
-              {showDropdown && this.getCountryDropdownList()}
-            </div>
+            <Popper
+              modifiers={[]}
+              placement={'top-start'}
+            >
+
+              {({ ref, style, placement }) => (
+                <div
+                  ref={ref}
+                  style={{
+                    ...style,
+                    zIndex: 10,
+                  }}
+                  className={portalClasses}
+                  data-placement={placement}
+                >
+                  <div className={containerClasses}>
+                    {showDropdown && this.getCountryDropdownList()}
+                  </div>
+                </div>
+              )}
+
+            </Popper>
 
           </Portal>
         )}
 
-        <div
-          className={flagViewClasses}
-          style={this.props.buttonStyle}
-          ref={el => this.dropdownContainerRef = el}
-        >
-          {renderStringAsFlag ?
-          <div className={selectedFlagClasses}>{renderStringAsFlag}</div>
-          :
-          <div
-            onClick={disableDropdown ? undefined : this.handleFlagDropdownClick}
-            className={selectedFlagClasses}
-            title={selectedCountry ? `${selectedCountry.name}: + ${selectedCountry.dialCode}` : ''}
-            tabIndex={disableDropdown ? '-1' : '0'}
-            role='button'
-            aria-haspopup="listbox"
-            aria-expanded={showDropdown ? true : undefined}
-          >
-            <div className={inputFlagClasses}>
-              {!disableDropdown && <div className={arrowClasses} />}
-            </div>
-          </div>}
-
-          {!this.props.portalId && showDropdown && this.getCountryDropdownList()}
-        </div>
-      </div>
+      </Manager>
     );
   }
 }
