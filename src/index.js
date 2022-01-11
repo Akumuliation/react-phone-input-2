@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import './utils/prototypes'
 
 import CountryData from './CountryData.js';
+import Portal from './Portal';
 
 class PhoneInput extends React.Component {
   static propTypes = {
@@ -25,6 +26,8 @@ class PhoneInput extends React.Component {
     searchPlaceholder: PropTypes.string,
     searchNotFound: PropTypes.string,
     disabled: PropTypes.bool,
+    withPortal: PropTypes.bool,
+    portalHost: PropTypes.instanceOf(ShadowRoot),
 
     containerStyle: PropTypes.object,
     inputStyle: PropTypes.object,
@@ -112,6 +115,7 @@ class PhoneInput extends React.Component {
     searchNotFound: 'No entries to show',
     flagsImagePath: './flags.png',
     disabled: false,
+    withPortal: false,
 
     containerStyle: {},
     inputStyle: {},
@@ -740,6 +744,10 @@ class PhoneInput extends React.Component {
     if (this.dropdownRef && !this.dropdownContainerRef.contains(e.target)) {
       this.state.showDropdown && this.setState({ showDropdown: false });
     }
+
+    if (this.props.withPortal) {
+      e.preventDefault();
+    }
   }
 
   handleSearchChange = (e) => {
@@ -931,6 +939,9 @@ class PhoneInput extends React.Component {
       'invalid-number': !isValidValue,
       'open': showDropdown,
     });
+    const portalClasses = classNames({
+      'react-tel-portal': true,
+    });
     const inputFlagClasses = `flag ${selectedCountry && selectedCountry.iso2}`;
 
     return (
@@ -958,6 +969,19 @@ class PhoneInput extends React.Component {
           {...this.props.inputProps}
         />
 
+        {this.props.withPortal && (
+          <Portal
+            portalId={this.props.portalId}
+            portalHost={this.props.portalHost}
+          >
+
+            <div className={portalClasses}>
+              {showDropdown && this.getCountryDropdownList()}
+            </div>
+
+          </Portal>
+        )}
+
         <div
           className={flagViewClasses}
           style={this.props.buttonStyle}
@@ -980,7 +1004,7 @@ class PhoneInput extends React.Component {
             </div>
           </div>}
 
-          {showDropdown && this.getCountryDropdownList()}
+          {!this.props.withPortal && showDropdown && this.getCountryDropdownList()}
         </div>
       </div>
     );
