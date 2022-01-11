@@ -26,7 +26,7 @@ class PhoneInput extends React.Component {
     searchPlaceholder: PropTypes.string,
     searchNotFound: PropTypes.string,
     disabled: PropTypes.bool,
-    withPortal: PropTypes.bool,
+    portalId: PropTypes.string,
     portalHost: PropTypes.instanceOf(ShadowRoot),
 
     containerStyle: PropTypes.object,
@@ -115,7 +115,7 @@ class PhoneInput extends React.Component {
     searchNotFound: 'No entries to show',
     flagsImagePath: './flags.png',
     disabled: false,
-    withPortal: false,
+    portalId: '',
 
     containerStyle: {},
     inputStyle: {},
@@ -744,10 +744,6 @@ class PhoneInput extends React.Component {
     if (this.dropdownRef && !this.dropdownContainerRef.contains(e.target)) {
       this.state.showDropdown && this.setState({ showDropdown: false });
     }
-
-    if (this.props.withPortal) {
-      e.preventDefault();
-    }
   }
 
   handleSearchChange = (e) => {
@@ -969,7 +965,7 @@ class PhoneInput extends React.Component {
           {...this.props.inputProps}
         />
 
-        {this.props.withPortal && (
+        {this.props.portalId && (
           <Portal
             portalId={this.props.portalId}
             portalHost={this.props.portalHost}
@@ -1000,11 +996,11 @@ class PhoneInput extends React.Component {
             aria-expanded={showDropdown ? true : undefined}
           >
             <div className={inputFlagClasses}>
-              {!disableDropdown && <div className={arrowClasses}></div>}
+              {!disableDropdown && <div className={arrowClasses} />}
             </div>
           </div>}
 
-          {!this.props.withPortal && showDropdown && this.getCountryDropdownList()}
+          {!this.props.portalId && showDropdown && this.getCountryDropdownList()}
         </div>
       </div>
     );
